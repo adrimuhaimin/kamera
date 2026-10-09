@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Foto selfie</title>
+<!--
+  TAB KAMERA untuk web app Apps Script.
+  Hosting file ini di alamat HTTPS biasa (GitHub Pages, Netlify, dsb.) dengan nama index.html,
+  lalu isi alamatnya di CONFIG.CAMERA_PAGE_URL pada Code.gs. File ini tidak perlu diubah.
+
+  Formulir membuka halaman ini dengan alamat:  .../#api=<URL web app>&id=<ID sekali pakai>
+  Foto dikirim ke doPost web app, lalu formulir mengambilnya dari sana.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#8C6A1C;--gold-deep:#6A4F10;--mist:#F6F2E7;--paper:#FFFFFF;--ink:#241D0F;--muted:#6B6352;--line:#E0D8C3;
+  --danger:#A2362E;--danger-bg:#F8E9E7;--ok:#1F6B4F;--ok-bg:#E3F1EA}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;min-height:100vh;background:var(--mist);color:var(--ink);font:15px/1.55 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;justify-content:center;padding:32px 20px}
+main{width:100%;max-width:420px}
+.brand{font-family:"Marcellus",Georgia,serif;color:var(--gold);font-size:17px}
+h1{font-family:"Marcellus",Georgia,serif;font-weight:400;font-size:28px;line-height:1.2;margin:6px 0 6px}
+p{margin:0;color:var(--muted)}
+.frame{margin:24px auto 0;width:min(280px,78vw);aspect-ratio:4/5;border-radius:50%;overflow:hidden;background:#E9E2CF;border:2px solid var(--gold);display:grid;place-items:center;color:var(--muted);text-align:center;padding:0}
+.frame span{padding:0 28px;font-size:14px}
+.frame video,.frame img{width:100%;height:100%;object-fit:cover}
+.frame video{transform:scaleX(-1)}
+.acts{display:flex;gap:10px;margin-top:24px}
+button{font:inherit;font-weight:600;height:50px;border-radius:10px;border:1px solid transparent;padding:0 18px;cursor:pointer;flex:1}
+.primary{background:var(--gold);color:#fff}
+.primary:hover{background:var(--gold-deep)}
+.quiet{background:var(--paper);border-color:var(--line);color:var(--gold)}
+button[disabled]{opacity:.6;cursor:not-allowed}
+button:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+.notice{margin-top:20px;padding:12px 14px;border-radius:10px;font-weight:500;font-size:14px;border:1px solid}
+.notice.err{background:var(--danger-bg);border-color:#E3BDB8;color:var(--danger)}
+.notice.ok{background:var(--ok-bg);border-color:#BBDCCB;color:var(--ok)}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand" id="brand"></div>
+  <h1>Foto selfie</h1>
+  <p id="lede">Wajah menghadap kamera, tanpa kacamata hitam, topi, atau masker.</p>
+
+  <div class="frame" id="frame">
+    <span id="placeholder">Menyiapkan kamera</span>
+    <video id="cam" autoplay playsinline muted hidden></video>
+    <img id="shot" alt="Pratinjau foto selfie" hidden>
+  </div>
+
+  <div class="acts">
+    <button class="quiet" type="button" id="retake" hidden>Foto ulang</button>
+    <button class="primary" type="button" id="main" disabled>Ambil foto</button>
+  </div>
+  <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+</main>
+
+<script>
+const $ = (s) => document.querySelector(s);
+const par = new URLSearchParams(location.hash.slice(1));
+const API = par.get("api") || "", ID = par.get("id") || "";
+// Foto hanya boleh dikirim ke web app Apps Script, dengan ID yang dibuat formulir
+const sah = /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[\w-]+\/(exec|dev)$/.test(API) && /^[a-f0-9-]{36,80}$/.test(ID);
+$("#brand").textContent = (par.get("brand") || "").slice(0, 60);
+
+let stream = null, foto = "", langkah = "kamera";   // kamera -> pratinjau -> terkirim
+
+function say(type, text) {
+  const n = $("#notice");
+  n.hidden = !text; n.textContent = text || ""; n.className = "notice" + (type ? " " + type : "");
+}
+function matikan() { if (stream) stream.getTracks().forEach((t) => t.stop()); stream = null; }
+
+function pesanKamera(err) {
+  const n = (err && err.name) || "", m = (err && err.message) || "";
+  if (n === "NotFoundError" || n === "OverconstrainedError") return "Kamera tidak ditemukan di perangkat ini. Kembali ke formulir dan pilih foto dari galeri.";
+  if (n === "NotReadableError" || n === "AbortError") return "Kamera sedang dipakai aplikasi lain. Tutup aplikasi itu, lalu tekan Buka kamera.";
+  if (/system/i.test(m)) return "Kamera diblokir oleh sistem operasi. Di Windows buka Settings > Privacy & security > Camera, lalu izinkan aplikasi desktop memakai kamera.";
+  if (/dismiss/i.test(m)) return "Jendela izin kamera ditutup sebelum dijawab. Tekan Buka kamera, lalu pilih Allow.";
+  if (n === "NotAllowedError") return "Izin kamera untuk halaman ini ditolak. Klik ikon di kiri alamat web, ubah Camera menjadi Allow, lalu muat ulang.";
+  return "Kamera tidak bisa dibuka. Kembali ke formulir dan pilih foto dari galeri.";
+}
+
+async function bukaKamera() {
+  const btn = $("#main");
+  btn.disabled = true; btn.textContent = "Ambil foto";
+  $("#retake").hidden = true; $("#shot").hidden = true;
+  $("#placeholder").hidden = false; $("#placeholder").textContent = "Menyiapkan kamera";
+  say();
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw { name: "TidakDidukung" };
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
+    } catch (e) {
+      if (e.name !== "OverconstrainedError" && e.name !== "NotFoundError") throw e;
+      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+    }
+    const cam = $("#cam");
+    cam.srcObject = stream; cam.hidden = false; $("#placeholder").hidden = true;
+    langkah = "kamera"; btn.disabled = false;
+  } catch (err) {
+    $("#placeholder").textContent = "Kamera belum terbuka";
+    langkah = "gagal"; btn.textContent = "Buka kamera"; btn.disabled = false;
+    say("err", pesanKamera(err) + (err.name && err.name !== "TidakDidukung" ? " (Detail: " + err.name + (err.message ? ", " + err.message : "") + ")" : ""));
+  }
+}
+
+function ambil() {
+  const cam = $("#cam");
+  if (!cam.videoWidth) return;
+  const k = Math.min(1, 960 / Math.max(cam.videoWidth, cam.videoHeight));
+  const c = document.createElement("canvas");
+  c.width = Math.round(cam.videoWidth * k); c.height = Math.round(cam.videoHeight * k);
+  c.getContext("2d").drawImage(cam, 0, 0, c.width, c.height);
+  foto = c.toDataURL("image/jpeg", 0.82);
+  matikan();
+  cam.hidden = true; $("#shot").src = foto; $("#shot").hidden = false;
+  langkah = "pratinjau"; $("#main").textContent = "Pakai foto ini"; $("#retake").hidden = false;
+}
+
+async function kirim() {
+  const btn = $("#main");
+  btn.disabled = true; $("#retake").disabled = true; btn.textContent = "Mengirim foto";
+  say();
+  const body = JSON.stringify({ id: ID, foto: foto });
+  let hasil = null;
+  try {
+    // text/plain = "permintaan sederhana": tidak memicu preflight, yang tidak dilayani Apps Script
+    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body, redirect: "follow" });
+    hasil = await r.json();
+  } catch (e) {
+    // Jawaban tidak terbaca (CORS). Kirim ulang tanpa membaca jawaban; formulir yang memastikan foto tiba.
+    try { await fetch(API, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body }); hasil = { success: true, buta: true }; }
+    catch (e2) { hasil = { success: false, message: "Foto gagal dikirim. Periksa koneksi internet, lalu coba lagi." }; }
+  }
+  $("#retake").disabled = false;
+  if (!hasil || !hasil.success) {
+    btn.disabled = false; btn.textContent = "Pakai foto ini";
+    return say("err", (hasil && hasil.message) || "Foto gagal dikirim. Coba lagi.");
+  }
+  langkah = "terkirim";
+  $("#retake").hidden = true; btn.textContent = "Tutup tab ini"; btn.disabled = false;
+  $("#lede").textContent = "Selesai. Lanjutkan pengisian di tab formulir.";
+  say("ok", hasil.buta ? "Foto dikirim. Kembali ke tab formulir; kalau foto belum muncul di sana dalam beberapa detik, ulangi dari tombol Buka kamera."
+                       : "Foto terkirim. Kembali ke tab formulir untuk melanjutkan.");
+}
+
+$("#main").addEventListener("click", () => {
+  if (langkah === "kamera") ambil();
+  else if (langkah === "pratinjau") kirim();
+  else if (langkah === "gagal") bukaKamera();
+  else if (langkah === "terkirim") { window.close(); say("ok", "Tab ini boleh ditutup. Lanjutkan di tab formulir."); }
+});
+$("#retake").addEventListener("click", bukaKamera);
+window.addEventListener("pagehide", matikan);
+
+if (!sah) {
+  $("#placeholder").textContent = "Tautan tidak lengkap";
+  say("err", "Halaman ini harus dibuka dari tombol Buka kamera di formulir pengajuan.");
+} else {
+  bukaKamera();
+}
+</script>
+</body>
+</html>
