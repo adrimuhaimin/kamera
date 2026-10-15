@@ -1,172 +1,988 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+<base target="_top">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex">
-<title>Foto selfie</title>
-<!--
-  TAB KAMERA untuk web app Apps Script.
-  Hosting file ini di alamat HTTPS biasa (GitHub Pages, Netlify, dsb.) dengan nama index.html,
-  lalu isi alamatnya di CONFIG.CAMERA_PAGE_URL pada Code.gs. File ini tidak perlu diubah.
-
-  Formulir membuka halaman ini dengan alamat:  .../#api=<URL web app>&id=<ID sekali pakai>
-  Foto dikirim ke doPost web app, lalu formulir mengambilnya dari sana.
--->
+<title>Pengajuan Pembiayaan</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Marcellus&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-:root{--gold:#8C6A1C;--gold-deep:#6A4F10;--mist:#F6F2E7;--paper:#FFFFFF;--ink:#241D0F;--muted:#6B6352;--line:#E0D8C3;
-  --danger:#A2362E;--danger-bg:#F8E9E7;--ok:#1F6B4F;--ok-bg:#E3F1EA}
+:root{
+  --pine:#8C6A1C; --pine-deep:#6A4F10; --brass:#F3DFA2; --brass-soft:#FBEFC9;
+  --mist:#F6F2E7; --paper:#FFFFFF; --ink:#241D0F; --muted:#6B6352; --line:#E0D8C3;
+  --danger:#A2362E; --danger-bg:#F8E9E7; --ok:#1F6B4F; --ok-bg:#E3F1EA; --wait:#7A5A12; --wait-bg:#F6ECD2;
+  --display:"Marcellus",Georgia,"Times New Roman",serif;
+  --body:"Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --star:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72' viewBox='0 0 72 72'%3E%3Cg fill='none' stroke='%23FFE9B0' stroke-opacity='.34'%3E%3Crect x='18' y='18' width='36' height='36'/%3E%3Crect x='18' y='18' width='36' height='36' transform='rotate(45 36 36)'/%3E%3Cpath d='M36 0v10.5M36 61.5V72M0 36h10.5M61.5 36H72'/%3E%3C/g%3E%3C/svg%3E");
+}
 *,*::before,*::after{box-sizing:border-box}
 [hidden]{display:none!important}
-body{margin:0;min-height:100vh;background:var(--mist);color:var(--ink);font:15px/1.55 "Plus Jakarta Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  display:flex;justify-content:center;padding:32px 20px}
-main{width:100%;max-width:420px}
-.brand{font-family:"Marcellus",Georgia,serif;color:var(--gold);font-size:17px}
-h1{font-family:"Marcellus",Georgia,serif;font-weight:400;font-size:28px;line-height:1.2;margin:6px 0 6px}
-p{margin:0;color:var(--muted)}
-.frame{margin:24px auto 0;width:min(280px,78vw);aspect-ratio:4/5;border-radius:50%;overflow:hidden;background:#E9E2CF;border:2px solid var(--gold);display:grid;place-items:center;color:var(--muted);text-align:center;padding:0}
-.frame span{padding:0 28px;font-size:14px}
-.frame video,.frame img{width:100%;height:100%;object-fit:cover}
-.frame video{transform:scaleX(-1)}
-.acts{display:flex;gap:10px;margin-top:24px}
-button{font:inherit;font-weight:600;height:50px;border-radius:10px;border:1px solid transparent;padding:0 18px;cursor:pointer;flex:1}
-.primary{background:var(--gold);color:#fff}
-.primary:hover{background:var(--gold-deep)}
-.quiet{background:var(--paper);border-color:var(--line);color:var(--gold)}
-button[disabled]{opacity:.6;cursor:not-allowed}
-button:focus-visible{outline:2px solid var(--gold-deep);outline-offset:2px}
+html,body{height:100%}
+body{margin:0;background:var(--mist);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+h1,h2,h3{font-family:var(--display);font-weight:400;margin:0;letter-spacing:.005em}
+p{margin:0}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--pine-deep);outline-offset:2px}
+.side :focus-visible,.topbar :focus-visible{outline-color:#fff}
+svg.star rect{fill:currentColor}
+
+/* ---------- Layout nasabah ---------- */
+.shell{min-height:100%;display:grid;grid-template-columns:minmax(340px,38%) 1fr}
+.side{position:relative;background:linear-gradient(165deg,#94701D 0%,#7A5A12 100%);color:#fff;padding:40px 44px;display:flex;flex-direction:column;overflow:hidden}
+.side::before{content:"";position:absolute;inset:0;background:var(--star);
+  -webkit-mask-image:linear-gradient(to top,#000 0%,transparent 62%);mask-image:linear-gradient(to top,#000 0%,transparent 62%)}
+.side>*{position:relative}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--display);font-size:19px}
+.brand svg{width:22px;height:22px;color:var(--brass)}
+.side h1{font-size:clamp(30px,3.1vw,44px);line-height:1.12;margin-top:64px;max-width:13ch}
+.lede{margin-top:16px;color:#F6EBCB;max-width:34ch}
+.steps{list-style:none;margin:48px 0 0;padding:0;display:grid;gap:22px}
+.steps li{display:flex;gap:14px;align-items:flex-start;color:#EBDDB4}
+.steps strong{display:block;font-weight:600;font-size:15px}
+.steps small{font-size:13px}
+.mark{position:relative;flex:none;width:38px;height:38px;display:grid;place-items:center;font-weight:700;font-size:14px}
+.mark svg{position:absolute;inset:0;width:100%;height:100%}
+.mark svg rect{fill:#86641A;stroke:#D2B870;stroke-width:1}
+.mark span{position:relative}
+.steps li.is-active{color:#fff}
+.steps li.is-active .mark{color:var(--pine-deep)}
+.steps li.is-active .mark svg rect{fill:var(--brass);stroke:var(--brass)}
+.steps li.is-done{color:#F6EBCB}
+.steps li.is-done .mark{color:var(--brass-soft)}
+.steps li.is-done .mark svg rect{stroke:var(--brass)}
+.side-foot{margin-top:auto;padding-top:40px}
+.link{background:none;border:0;padding:4px 0;color:inherit;text-decoration:underline;text-underline-offset:3px;font-weight:500}
+.side .link{color:var(--brass-soft)}
+
+.stage{padding:56px 24px;display:flex;justify-content:center;align-items:flex-start}
+.panel{width:100%;max-width:468px}
+.panel h2{font-size:30px;line-height:1.2}
+.panel .sub{color:var(--muted);margin-top:8px}
+.view{animation:rise .28s ease-out}
+@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+/* ---------- Form ---------- */
+form{margin-top:28px;display:grid;gap:20px}
+.field{display:grid;gap:6px}
+.field>label,.legend{font-weight:600;font-size:14px}
+.hint{font-size:13px;color:var(--muted)}
+.input{width:100%;height:48px;padding:0 14px;background:var(--paper);border:1px solid var(--line);border-radius:10px;transition:border-color .15s,box-shadow .15s}
+textarea.input{height:auto;padding:12px 14px;resize:vertical}
+.input:focus{outline:0;border-color:var(--pine);box-shadow:0 0 0 3px rgba(140,106,28,.2)}
+.affix{position:relative}
+.affix span{position:absolute;left:14px;top:0;height:48px;display:flex;align-items:center;color:var(--muted);font-weight:600}
+.affix .input{padding-left:44px;font-variant-numeric:tabular-nums}
+.row2{display:grid;grid-template-columns:1fr;gap:20px}
+fieldset{border:0;margin:0;padding:0;min-width:0;display:grid;gap:8px}
+
+.seg{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:#EAE2CD;border-radius:10px;padding:4px;gap:4px}
+.seg label{position:relative}
+.seg input{position:absolute;opacity:0;inset:0}
+.seg span{display:block;text-align:center;padding:9px 6px;border-radius:7px;font-weight:600;font-size:14px;color:var(--muted);cursor:pointer}
+.seg input:checked+span{background:var(--paper);color:var(--pine);box-shadow:0 1px 2px rgba(60,44,8,.18)}
+.seg input:focus-visible+span{outline:2px solid var(--pine-deep);outline-offset:1px}
+
+.choices{display:grid;gap:8px}
+.choice{position:relative;display:block}
+.choice input{position:absolute;opacity:0;inset:0}
+.choice div{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 14px 12px 42px;cursor:pointer}
+.choice div::before{content:"";position:absolute;left:14px;top:16px;width:16px;height:16px;border-radius:50%;border:1.5px solid #B5AA8C;background:var(--paper)}
+.choice strong{display:block;font-weight:600}
+.choice small{color:var(--muted);font-size:13px}
+.choice input:checked+div{border-color:var(--pine);box-shadow:inset 0 0 0 1px var(--pine)}
+.choice input:checked+div::before{border-color:var(--pine);background:radial-gradient(var(--pine) 0 4px,var(--paper) 5px)}
+.choice input:focus-visible+div{outline:2px solid var(--pine-deep);outline-offset:2px}
+
+.btn{height:50px;padding:0 20px;border:1px solid transparent;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+.btn-primary{background:var(--pine);color:#fff;width:100%}
+.btn-primary:hover{background:var(--pine-deep)}
+.btn-quiet{background:var(--paper);border-color:var(--line);color:var(--pine)}
+.btn-quiet:hover{border-color:var(--pine)}
+.btn-danger{background:var(--paper);border-color:var(--danger);color:var(--danger)}
+.btn-danger:hover{background:var(--danger-bg)}
+.btn-sm{height:38px;padding:0 14px;font-size:14px}
+.btn[disabled]{opacity:.6;cursor:not-allowed}
+.btn.is-busy::before{content:"";width:15px;height:15px;border-radius:50%;border:2px solid currentColor;border-right-color:transparent;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+
 .notice{margin-top:20px;padding:12px 14px;border-radius:10px;font-weight:500;font-size:14px;border:1px solid}
 .notice.err{background:var(--danger-bg);border-color:#E3BDB8;color:var(--danger)}
 .notice.ok{background:var(--ok-bg);border-color:#BBDCCB;color:var(--ok)}
+
+.code{height:64px;text-align:center;font-family:var(--display);font-size:32px;letter-spacing:.42em;padding-left:.42em;font-variant-numeric:tabular-nums}
+.under{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:14px;color:var(--muted)}
+.under .link{color:var(--pine)}
+.under .link[disabled]{color:var(--muted);text-decoration:none;cursor:default}
+
+/* ---------- Selfie ---------- */
+.selfie{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:16px;display:grid;grid-template-columns:112px 1fr;gap:16px;align-items:center}
+.frame{width:112px;height:140px;border-radius:56px;background:var(--mist);border:1px dashed #B5AA8C;overflow:hidden;display:grid;place-items:center;color:#A99E80}
+.frame.has{border-style:solid;border-color:var(--pine)}
+.frame svg{width:44px;height:44px}
+.frame img,.frame video{width:100%;height:100%;object-fit:cover}
+.frame video{transform:scaleX(-1)}
+.selfie-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.check{display:grid;grid-template-columns:20px 1fr;gap:10px;align-items:start;font-size:14px}
+.check input{width:18px;height:18px;margin:2px 0 0;accent-color:var(--pine)}
+
+/* ---------- Selesai ---------- */
+.done-star{width:64px;height:64px;color:var(--pine);position:relative;display:grid;place-items:center}
+.done-star svg.star{position:absolute;inset:0;width:100%;height:100%}
+.done-star svg.tick{position:relative;width:26px;height:26px;color:#fff}
+.receipt{margin:28px 0;background:var(--paper);border:1px solid var(--line);border-radius:14px}
+.receipt div{display:flex;justify-content:space-between;gap:16px;padding:14px 18px}
+.receipt div+div{border-top:1px solid var(--line)}
+.receipt dt{color:var(--muted)}
+.receipt dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+
+/* ---------- Admin ---------- */
+.topbar{background:var(--pine);color:#fff;padding:14px 28px;display:flex;align-items:center;justify-content:space-between;gap:16px}
+.topbar .who{display:flex;align-items:center;gap:16px;font-size:14px;color:#F6EBCB}
+.topbar .link{color:var(--brass-soft)}
+.board{max-width:1120px;margin:0 auto;padding:32px 24px 64px}
+.board h2{font-size:30px}
+.tools{margin:22px 0 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between}
+.tabs{display:flex;flex-wrap:wrap;gap:6px}
+.tab{background:none;border:1px solid transparent;border-radius:999px;padding:7px 14px;font-weight:600;font-size:14px;color:var(--muted)}
+.tab b{font-weight:600;margin-left:4px;opacity:.7;font-variant-numeric:tabular-nums}
+.tab[aria-pressed="true"]{background:var(--pine);color:#fff}
+.tab:not([aria-pressed="true"]):hover{border-color:var(--line);background:var(--paper)}
+.tools .right{display:flex;gap:8px;flex:1;justify-content:flex-end;min-width:240px}
+.tools .input{height:40px;max-width:280px}
+.sheet{background:var(--paper);border:1px solid var(--line);border-radius:14px;overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th{text-align:left;font-weight:600;font-size:13px;color:var(--muted);padding:12px 16px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:14px 16px;border-bottom:1px solid #EEE8D8;vertical-align:middle}
+tr:last-child td{border-bottom:0}
+td small{display:block;color:var(--muted);font-size:13px}
+.num{font-variant-numeric:tabular-nums;font-weight:600}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:600;white-space:nowrap}
+.pill.wait{background:var(--wait-bg);color:var(--wait)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.no{background:var(--danger-bg);color:var(--danger)}
+.empty{padding:48px 16px;text-align:center;color:var(--muted)}
+
+dialog{border:0;padding:0;border-radius:16px;background:var(--paper);color:var(--ink);width:min(420px,calc(100vw - 32px));box-shadow:0 24px 60px rgba(60,44,8,.28)}
+dialog::backdrop{background:rgba(48,35,6,.55)}
+.dlg{padding:28px}
+.dlg h3{font-size:24px}
+.dlg form{margin-top:20px;gap:16px}
+.dlg-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.x{background:none;border:0;width:36px;height:36px;border-radius:8px;display:grid;place-items:center;color:var(--muted);margin:-6px -8px 0 0}
+.x:hover{background:var(--mist)}
+#dlg-review{width:min(720px,calc(100vw - 32px))}
+.review{display:grid;grid-template-columns:220px 1fr;gap:24px;margin-top:20px}
+.photo{aspect-ratio:4/5;background:var(--mist);border-radius:12px;overflow:hidden;display:grid;place-items:center;color:var(--muted);font-size:13px;text-align:center;padding:0}
+.photo img{width:100%;height:100%;object-fit:cover}
+.facts{margin:0;display:grid;gap:10px}
+.facts div{display:grid;grid-template-columns:96px 1fr;gap:8px}
+.facts dt{color:var(--muted);font-size:14px}
+.facts dd{margin:0;font-weight:600;overflow-wrap:anywhere}
+.acts{display:flex;gap:10px;margin-top:8px}
+.acts .btn{flex:1}
+
+@media (max-width:900px){
+  .shell{grid-template-columns:1fr;grid-template-rows:auto 1fr}
+  .side{padding:20px 20px 18px}
+  .side::before{-webkit-mask-image:linear-gradient(to left,#000,transparent 70%);mask-image:linear-gradient(to left,#000,transparent 70%)}
+  .side h1,.lede,.steps small,.steps strong{display:none}
+  .steps{margin-top:18px;grid-auto-flow:column;justify-content:start;gap:10px}
+  .side-foot{position:absolute;bottom:26px;right:20px;margin:0;padding:0;font-size:14px}
+  .stage{padding:32px 20px 48px}
+  .panel h2{font-size:26px}
+  .review{grid-template-columns:1fr}
+  .photo{max-width:220px}
+  .topbar{padding:12px 20px}
+  .board{padding:24px 16px 48px}
+}
+@media (max-width:420px){ .selfie{grid-template-columns:1fr;justify-items:start} }
+@media (prefers-reduced-motion:reduce){ *{animation:none!important;transition:none!important} }
+
+#boot{position:fixed;inset:0;z-index:10;background:var(--mist);display:grid;place-items:center;padding:24px;text-align:center}
+#boot p{max-width:46ch;color:var(--muted)}
+#boot.err p{color:var(--danger);font-weight:500}
 </style>
 </head>
 <body>
-<main>
-  <div class="brand" id="brand"></div>
-  <h1>Foto selfie</h1>
-  <p id="lede">Wajah menghadap kamera, tanpa kacamata hitam, topi, atau masker.</p>
+<div id="boot" role="status"><p>Memuat aplikasi</p></div>
 
-  <div class="frame" id="frame">
-    <span id="placeholder">Menyiapkan kamera</span>
-    <video id="cam" autoplay playsinline muted hidden></video>
-    <img id="shot" alt="Pratinjau foto selfie" hidden>
+<!-- ================= NASABAH ================= -->
+<div id="app-user" class="shell">
+  <aside class="side">
+    <div class="brand">
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg>
+      <span data-brand></span>
+    </div>
+    <h1>Ajukan pembiayaan syariah dari ponsel Anda</h1>
+    <p class="lede">Tiga langkah, sekitar lima menit. Siapkan KTP dan pastikan wajah Anda terlihat jelas.</p>
+    <ol class="steps" id="steps">
+      <li class="is-active"><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg><span>1</span></span>
+        <div><strong>Verifikasi kontak</strong><small>Kode lewat WhatsApp, SMS, atau email</small></div></li>
+      <li><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg><span>2</span></span>
+        <div><strong>Isi pengajuan</strong><small>Data diri, akad, dan foto selfie</small></div></li>
+      <li><span class="mark"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg><span>3</span></span>
+        <div><strong>Tunggu pemeriksaan</strong><small>Petugas memeriksa berkas Anda</small></div></li>
+    </ol>
+    <div class="side-foot"><button class="link" type="button" id="open-login">Masuk sebagai petugas</button></div>
+  </aside>
+
+  <main class="stage">
+    <div class="panel">
+
+      <!-- Langkah 1a: minta kode -->
+      <section class="view" id="v-contact">
+        <h2>Verifikasi kontak Anda</h2>
+        <p class="sub">Kami kirim kode sekali pakai untuk memastikan kontak ini milik Anda.</p>
+        <form id="f-contact" novalidate>
+          <fieldset>
+            <span class="legend">Kirim kode lewat</span>
+            <div class="seg">
+              <label><input type="radio" name="kanal" value="whatsapp" checked><span>WhatsApp</span></label>
+              <label><input type="radio" name="kanal" value="sms"><span>SMS</span></label>
+              <label><input type="radio" name="kanal" value="email"><span>Email</span></label>
+            </div>
+          </fieldset>
+          <div class="field">
+            <label for="kontak" id="kontak-label">Nomor WhatsApp</label>
+            <input class="input" id="kontak" type="tel" inputmode="tel" autocomplete="tel" placeholder="081234567890" required>
+          </div>
+          <button class="btn btn-primary" type="submit">Kirim kode</button>
+          <p class="under" id="reg-row"><span>Belum punya akun?</span><button class="link" type="button" id="to-register">Daftar akun baru</button></p>
+        </form>
+      </section>
+
+      <!-- Pendaftaran akun baru -->
+      <section class="view" id="v-register" hidden>
+        <h2>Daftar akun baru</h2>
+        <p class="sub">Kami kirim kode ke <strong id="reg-dest"></strong> untuk memastikan kontak ini milik Anda.</p>
+        <form id="f-register" novalidate>
+          <div class="field">
+            <label for="reg-nama">Nama lengkap</label>
+            <input class="input" id="reg-nama" type="text" autocomplete="name" maxlength="80" required>
+          </div>
+          <button class="btn btn-primary" type="submit">Daftar dan kirim kode</button>
+          <div class="under"><span></span><button class="link" type="button" id="reg-back">Ganti kontak</button></div>
+        </form>
+      </section>
+
+      <!-- Langkah 1b: masukkan kode -->
+      <section class="view" id="v-code" hidden>
+        <h2>Masukkan kode</h2>
+        <p class="sub">Kode dikirim ke <strong id="code-dest"></strong> dan berlaku 5 menit.</p>
+        <form id="f-code" novalidate>
+          <div class="field">
+            <label for="kode">Kode verifikasi</label>
+            <input class="input code" id="kode" type="text" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]*" required>
+          </div>
+          <button class="btn btn-primary" type="submit">Verifikasi kode</button>
+          <div class="under">
+            <button class="link" type="button" id="resend" disabled>Kirim ulang kode</button>
+            <button class="link" type="button" id="change-contact">Ganti kontak</button>
+          </div>
+        </form>
+      </section>
+
+      <!-- Langkah 2: formulir -->
+      <section class="view" id="v-form" hidden>
+        <h2>Isi pengajuan</h2>
+        <p class="sub">Isi sesuai KTP. Petugas mencocokkan data ini dengan foto Anda.</p>
+        <form id="f-loan" novalidate>
+          <div class="field">
+            <label for="nama">Nama lengkap</label>
+            <input class="input" id="nama" type="text" autocomplete="name" maxlength="80" required>
+          </div>
+          <div class="field">
+            <label for="nik">NIK</label>
+            <input class="input" id="nik" type="text" inputmode="numeric" maxlength="16" autocomplete="off" required aria-describedby="nik-hint">
+            <span class="hint" id="nik-hint">16 digit, tertera di KTP.</span>
+          </div>
+          <div class="field">
+            <label for="nominal">Nominal pembiayaan</label>
+            <div class="affix"><span>Rp</span><input class="input" id="nominal" type="text" inputmode="numeric" autocomplete="off" required aria-describedby="nominal-hint"></div>
+            <span class="hint" id="nominal-hint"></span>
+          </div>
+          <fieldset>
+            <span class="legend">Tenor</span>
+            <div class="seg" id="tenor"></div>
+          </fieldset>
+          <fieldset>
+            <span class="legend">Akad</span>
+            <div class="choices" id="akad"></div>
+          </fieldset>
+          <fieldset>
+            <span class="legend">Foto selfie</span>
+            <div class="selfie">
+              <div class="frame" id="frame">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="12" cy="9" r="4"/><path d="M4.5 20c1.2-3.6 4-5.5 7.5-5.5s6.3 1.9 7.5 5.5"/></svg>
+                <video id="cam" autoplay playsinline muted hidden></video>
+                <img id="shot" alt="Pratinjau foto selfie" hidden>
+              </div>
+              <div>
+                <p class="hint" id="selfie-hint">Wajah menghadap kamera, tanpa kacamata hitam, topi, atau masker.</p>
+                <div class="selfie-actions">
+                  <button class="btn btn-quiet btn-sm" type="button" id="cam-btn">Buka kamera</button>
+                  <label class="btn btn-quiet btn-sm" for="file">Pilih dari galeri</label>
+                  <input id="file" type="file" accept="image/jpeg,image/png" hidden>
+                  <label class="btn btn-quiet btn-sm" for="file-cam" id="native-cam" hidden>Pakai aplikasi kamera</label>
+                  <input id="file-cam" type="file" accept="image/*" capture="user" hidden>
+                </div>
+              </div>
+            </div>
+          </fieldset>
+          <div class="field" id="kontak-lain-field" hidden>
+            <label for="kontak-lain" id="kontak-lain-label">Email untuk pemberitahuan (opsional)</label>
+            <input class="input" id="kontak-lain" type="email" maxlength="120" aria-describedby="kontak-lain-hint">
+            <span class="hint" id="kontak-lain-hint"></span>
+          </div>
+          <label class="check">
+            <input type="checkbox" id="setuju">
+            <span>Saya setuju NIK dan foto wajah saya diproses untuk memeriksa pengajuan ini.</span>
+          </label>
+          <button class="btn btn-primary" type="submit">Kirim pengajuan</button>
+        </form>
+      </section>
+
+      <!-- Langkah 3: selesai -->
+      <section class="view" id="v-done" hidden>
+        <div class="done-star" aria-hidden="true">
+          <svg class="star" viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg>
+          <svg class="tick" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+        </div>
+        <h2 style="margin-top:20px">Pengajuan terkirim</h2>
+        <p class="sub">Petugas akan memeriksa data dan foto Anda. Simpan nomor pengajuan ini untuk menanyakan statusnya.</p>
+        <dl class="receipt">
+          <div><dt>Nomor pengajuan</dt><dd id="done-id"></dd></div>
+          <div><dt>Status</dt><dd><span class="pill wait">Menunggu pemeriksaan</span></dd></div>
+        </dl>
+        <p class="hint" id="done-notif" hidden style="margin:-12px 0 24px"></p>
+        <button class="btn btn-quiet" type="button" onclick="location.reload()">Kembali ke awal</button>
+      </section>
+
+      <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
+    </div>
+  </main>
+</div>
+
+<!-- ================= ADMIN ================= -->
+<div id="app-admin" hidden>
+  <header class="topbar">
+    <div class="brand">
+      <svg class="star" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="5" width="14" height="14"/><rect x="5" y="5" width="14" height="14" transform="rotate(45 12 12)"/></svg>
+      <span data-brand></span>
+    </div>
+    <div class="who"><span id="admin-name"></span><button class="link" type="button" id="logout">Keluar</button></div>
+  </header>
+  <div class="board">
+    <h2>Pemeriksaan pengajuan</h2>
+    <div class="tools">
+      <div class="tabs" id="tabs"></div>
+      <div class="right">
+        <input class="input" id="search" type="search" placeholder="Cari nama, nomor, atau kontak" aria-label="Cari pengajuan">
+        <button class="btn btn-quiet btn-sm" type="button" id="refresh">Muat ulang</button>
+      </div>
+    </div>
+    <div class="sheet">
+      <table>
+        <thead><tr><th>Pemohon</th><th>Pengajuan</th><th>Nominal</th><th>Akad</th><th>Status</th><th></th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+    </div>
+    <div class="notice" id="admin-notice" role="status" aria-live="polite" hidden></div>
   </div>
+</div>
 
-  <div class="acts">
-    <button class="quiet" type="button" id="retake" hidden>Foto ulang</button>
-    <button class="primary" type="button" id="main" disabled>Ambil foto</button>
+<dialog id="dlg-login" aria-labelledby="login-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <h3 id="login-title">Masuk sebagai petugas</h3>
+      <button class="x" type="button" data-close aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <form id="f-login" novalidate>
+      <div class="field"><label for="adm-u">Username</label><input class="input" id="adm-u" type="text" autocomplete="username" autocapitalize="none" required></div>
+      <div class="field"><label for="adm-p">Password</label><input class="input" id="adm-p" type="password" autocomplete="current-password" required></div>
+      <div class="field" id="adm-otp-row" hidden>
+        <label for="adm-otp">Kode verifikasi</label>
+        <input class="input" id="adm-otp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8">
+        <span class="hint" id="adm-otp-hint"></span>
+      </div>
+      <div class="notice err" id="login-err" role="alert" hidden style="margin:0"></div>
+      <button class="btn btn-primary" type="submit">Masuk</button>
+    </form>
   </div>
-  <div class="notice" id="notice" role="status" aria-live="polite" hidden></div>
-</main>
+</dialog>
 
-<script>
-const $ = (s) => document.querySelector(s);
-const par = new URLSearchParams(location.hash.slice(1));
-const API = par.get("api") || "", ID = par.get("id") || "";
-// Foto hanya boleh dikirim ke web app Apps Script, dengan ID yang dibuat formulir
-const sah = /^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[\w-]+\/(exec|dev)$/.test(API) && /^[a-f0-9-]{36,80}$/.test(ID);
-$("#brand").textContent = (par.get("brand") || "").slice(0, 60);
+<dialog id="dlg-review" aria-labelledby="rev-title">
+  <div class="dlg">
+    <div class="dlg-head">
+      <div><h3 id="rev-title"></h3><p class="hint" id="rev-sub"></p></div>
+      <button class="x" type="button" data-close aria-label="Tutup"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="review">
+      <div class="photo" id="rev-photo"></div>
+      <div style="display:grid;gap:18px;align-content:start">
+        <dl class="facts" id="rev-facts"></dl>
+        <div class="field">
+          <label for="rev-note">Catatan pemeriksaan</label>
+          <textarea class="input" id="rev-note" rows="3" maxlength="500" aria-describedby="rev-note-hint"></textarea>
+          <span class="hint" id="rev-note-hint">Wajib diisi jika pengajuan ditolak.</span>
+        </div>
+        <div class="notice err" id="rev-err" role="alert" hidden style="margin:0"></div>
+        <div class="acts">
+          <button class="btn btn-danger" type="button" id="rev-no">Tolak pengajuan</button>
+          <button class="btn btn-primary" type="button" id="rev-ok">Setujui pengajuan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</dialog>
 
-let stream = null, foto = "", langkah = "kamera";   // kamera -> pratinjau -> terkirim
+<script type="module">
+// =================================================================
+// VERSI GITHUB PAGES. Halaman ini berjalan di luar Apps Script, sehingga kamera
+// bisa dibuka langsung di halaman ini. Server tetap Apps Script (Code.gs).
+// Tempel alamat web app Anda (berakhiran /exec) di bawah ini:
+// =================================================================
+const API_URL = "TEMPEL_URL_WEB_APP_DI_SINI";
 
-function say(type, text) {
-  const n = $("#notice");
-  n.hidden = !text; n.textContent = text || ""; n.className = "notice" + (type ? " " + type : "");
-}
-function matikan() { if (stream) stream.getTracks().forEach((t) => t.stop()); stream = null; }
-
-function pesanKamera(err) {
-  const n = (err && err.name) || "", m = (err && err.message) || "";
-  if (n === "NotFoundError" || n === "OverconstrainedError") return "Kamera tidak ditemukan di perangkat ini. Kembali ke formulir dan pilih foto dari galeri.";
-  if (n === "NotReadableError" || n === "AbortError") return "Kamera sedang dipakai aplikasi lain. Tutup aplikasi itu, lalu tekan Buka kamera.";
-  if (/system/i.test(m)) return "Kamera diblokir oleh sistem operasi. Di Windows buka Settings > Privacy & security > Camera, lalu izinkan aplikasi desktop memakai kamera.";
-  if (/dismiss/i.test(m)) return "Jendela izin kamera ditutup sebelum dijawab. Tekan Buka kamera, lalu pilih Allow.";
-  if (n === "NotAllowedError") return "Izin kamera untuk halaman ini ditolak. Klik ikon di kiri alamat web, ubah Camera menjadi Allow, lalu muat ulang.";
-  return "Kamera tidak bisa dibuka. Kembali ke formulir dan pilih foto dari galeri.";
-}
-
-async function bukaKamera() {
-  const btn = $("#main");
-  btn.disabled = true; btn.textContent = "Ambil foto";
-  $("#retake").hidden = true; $("#shot").hidden = true;
-  $("#placeholder").hidden = false; $("#placeholder").textContent = "Menyiapkan kamera";
-  say();
-  try {
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) throw { name: "TidakDidukung" };
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false });
-    } catch (e) {
-      if (e.name !== "OverconstrainedError" && e.name !== "NotFoundError") throw e;
-      stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-    }
-    const cam = $("#cam");
-    cam.srcObject = stream; cam.hidden = false; $("#placeholder").hidden = true;
-    langkah = "kamera"; btn.disabled = false;
-  } catch (err) {
-    $("#placeholder").textContent = "Kamera belum terbuka";
-    langkah = "gagal"; btn.textContent = "Buka kamera"; btn.disabled = false;
-    say("err", pesanKamera(err) + (err.name && err.name !== "TidakDidukung" ? " (Detail: " + err.name + (err.message ? ", " + err.message : "") + ")" : ""));
+const APP = await (async () => {
+  const boot = document.getElementById("boot");
+  const gagal = (teks) => { boot.className = "err"; boot.firstElementChild.textContent = teks; return new Promise(() => {}); };
+  if (!/^https:\/\/script\.google\.com\/.+\/exec$/.test(API_URL)) {
+    return gagal("Alamat server belum diisi. Buka file index.html, cari API_URL, lalu tempel alamat web app Apps Script yang berakhiran /exec.");
   }
-}
+  const res = await api("getConfig", []);
+  if (!res.success) {
+    return gagal("Server tidak bisa dihubungi. Pastikan API_URL benar dan web app di-deploy dengan akses Anyone, lalu muat ulang halaman.");
+  }
+  document.title = res.config.brand + " - Pengajuan Pembiayaan";
+  document.querySelectorAll("[data-brand]").forEach((el) => { el.textContent = res.config.brand; });
+  boot.remove();
+  return res.config;
+})();
+const $ = (s, r) => (r || document).querySelector(s);
+const esc = (v) => String(v == null ? "" : v).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const rupiah = (n) => "Rp" + Number(n || 0).toLocaleString("id-ID");
+const tanggal = (iso) => iso ? new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" }) : "";
 
-function ambil() {
-  const cam = $("#cam");
-  if (!cam.videoWidth) return;
-  const k = Math.min(1, 960 / Math.max(cam.videoWidth, cam.videoHeight));
-  const c = document.createElement("canvas");
-  c.width = Math.round(cam.videoWidth * k); c.height = Math.round(cam.videoHeight * k);
-  c.getContext("2d").drawImage(cam, 0, 0, c.width, c.height);
-  foto = c.toDataURL("image/jpeg", 0.82);
-  matikan();
-  cam.hidden = true; $("#shot").src = foto; $("#shot").hidden = false;
-  langkah = "pratinjau"; $("#main").textContent = "Pakai foto ini"; $("#retake").hidden = false;
+/** Memanggil fungsi server. Selalu mengembalikan objek { success, message, ... }. */
+function call(fn, ...args) {
+  // Di luar Apps Script (mis. GitHub Pages) fungsi server dipanggil lewat POST ke alamat /exec
+  if (typeof API_URL === "string") return api(fn, args);
+  return new Promise((resolve) => {
+    google.script.run
+      .withSuccessHandler((res) => resolve(res || { success: false, message: "Server tidak merespons. Coba lagi." }))
+      .withFailureHandler(() => resolve({ success: false, message: "Koneksi ke server gagal. Periksa jaringan lalu coba lagi." }))[fn](...args);
+  });
 }
-
-async function kirim() {
-  const btn = $("#main");
-  btn.disabled = true; $("#retake").disabled = true; btn.textContent = "Mengirim foto";
-  say();
-  const body = JSON.stringify({ id: ID, foto: foto });
-  let hasil = null;
+async function api(fn, args) {
   try {
     // text/plain = "permintaan sederhana": tidak memicu preflight, yang tidak dilayani Apps Script
-    const r = await fetch(API, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body, redirect: "follow" });
-    hasil = await r.json();
+    const r = await fetch(API_URL, { method: "POST", redirect: "follow",
+      headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ fn: fn, args: args }) });
+    return (await r.json()) || { success: false, message: "Server tidak merespons. Coba lagi." };
   } catch (e) {
-    // Jawaban tidak terbaca (CORS). Kirim ulang tanpa membaca jawaban; formulir yang memastikan foto tiba.
-    try { await fetch(API, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: body }); hasil = { success: true, buta: true }; }
-    catch (e2) { hasil = { success: false, message: "Foto gagal dikirim. Periksa koneksi internet, lalu coba lagi." }; }
+    return { success: false, message: "Koneksi ke server gagal. Periksa jaringan lalu coba lagi." };
   }
-  $("#retake").disabled = false;
-  if (!hasil || !hasil.success) {
-    btn.disabled = false; btn.textContent = "Pakai foto ini";
-    return say("err", (hasil && hasil.message) || "Foto gagal dikirim. Coba lagi.");
-  }
-  langkah = "terkirim";
-  $("#retake").hidden = true; btn.textContent = "Tutup tab ini"; btn.disabled = false;
-  $("#lede").textContent = "Selesai. Lanjutkan pengisian di tab formulir.";
-  say("ok", hasil.buta ? "Foto dikirim. Kembali ke tab formulir; kalau foto belum muncul di sana dalam beberapa detik, ulangi dari tombol Buka kamera."
-                       : "Foto terkirim. Kembali ke tab formulir untuk melanjutkan.");
+}
+function busy(btn, on, label) {
+  if (on) { btn.dataset.label = btn.textContent; btn.textContent = label; }
+  else if (btn.dataset.label) btn.textContent = btn.dataset.label;
+  btn.disabled = on; btn.classList.toggle("is-busy", on);
+}
+function say(el, type, text) {
+  el.hidden = !text; el.textContent = text || "";
+  el.className = "notice" + (type ? " " + type : "");
 }
 
-$("#main").addEventListener("click", () => {
-  if (langkah === "kamera") ambil();
-  else if (langkah === "pratinjau") kirim();
-  else if (langkah === "gagal") bukaKamera();
-  else if (langkah === "terkirim") { window.close(); say("ok", "Tab ini boleh ditutup. Lanjutkan di tab formulir."); }
+// ================= NASABAH =================
+const state = { otpId: "", token: "", kanal: "whatsapp", kontak: "", namaDaftar: "", foto: "", stream: null, timer: null };
+const notice = $("#notice");
+const views = ["v-contact", "v-register", "v-code", "v-form", "v-done"];
+
+function show(view, step) {
+  views.forEach((v) => { $("#" + v).hidden = v !== view; });
+  [...$("#steps").children].forEach((li, i) => {
+    li.classList.toggle("is-active", i + 1 === step);
+    li.classList.toggle("is-done", i + 1 < step);
+  });
+  say(notice);
+  window.scrollTo(0, 0);
+}
+
+// --- Langkah 1: kontak & kode ---
+document.querySelectorAll('input[name="kanal"]').forEach((r) => r.addEventListener("change", () => {
+  state.kanal = r.value;
+  const inp = $("#kontak"), email = r.value === "email";
+  $("#kontak-label").textContent = email ? "Alamat email" : r.value === "sms" ? "Nomor HP" : "Nomor WhatsApp";
+  inp.type = email ? "email" : "tel";
+  inp.inputMode = email ? "email" : "tel";
+  inp.autocomplete = email ? "email" : "tel";
+  inp.placeholder = email ? "nama@email.com" : "081234567890";
+  inp.value = "";
+  inp.focus();
+}));
+
+/** Meminta kode: lewat pendaftaran jika state.namaDaftar terisi, selain itu sebagai pengguna terdaftar. */
+function kirimKode() {
+  return state.namaDaftar ? call("daftarPengguna", state.kontak, state.kanal, state.namaDaftar)
+                          : call("sendOTP", state.kontak, state.kanal);
+}
+function keKode(res) {
+  state.otpId = res.otpId;
+  $("#code-dest").textContent = res.tujuan;
+  $("#kode").value = "";
+  $("#kode").maxLength = APP.otpLength;
+  show("v-code", 1);
+  say(notice, "ok", res.message);
+  hitungMundur();
+  $("#kode").focus();
+}
+function keDaftar(pesan) {
+  $("#reg-dest").textContent = state.kontak;
+  show("v-register", 1);
+  if (pesan) say(notice, "err", pesan);
+  $("#reg-nama").focus();
+}
+function bacaKontak() {
+  const kontak = $("#kontak").value.trim();
+  if (!kontak) { say(notice, "err", state.kanal === "email" ? "Isi alamat email Anda." : "Isi nomor HP Anda."); $("#kontak").focus(); return false; }
+  state.kontak = kontak;
+  return true;
+}
+
+$("#reg-row").hidden = !APP.bisaDaftar;
+$("#f-contact").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!bacaKontak()) return;
+  state.namaDaftar = "";
+  const btn = $("#f-contact .btn-primary");
+  busy(btn, true, "Mengirim kode");
+  const res = await kirimKode();
+  busy(btn, false);
+  if (res.belumTerdaftar) return keDaftar(res.message);
+  if (!res.success) return say(notice, "err", res.message);
+  keKode(res);
 });
-$("#retake").addEventListener("click", bukaKamera);
-window.addEventListener("pagehide", matikan);
+$("#to-register").addEventListener("click", () => { if (bacaKontak()) keDaftar(); });
+$("#reg-back").addEventListener("click", () => { show("v-contact", 1); $("#kontak").focus(); });
+$("#f-register").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const nama = $("#reg-nama").value.trim();
+  if (nama.length < 3) { say(notice, "err", "Isi nama lengkap Anda."); $("#reg-nama").focus(); return; }
+  state.namaDaftar = nama;
+  const btn = $("#f-register .btn-primary");
+  busy(btn, true, "Mengirim kode");
+  const res = await kirimKode();
+  busy(btn, false);
+  if (!res.success) return say(notice, "err", res.message);
+  keKode(res);
+});
 
-if (!sah) {
-  $("#placeholder").textContent = "Tautan tidak lengkap";
-  say("err", "Halaman ini harus dibuka dari tombol Buka kamera di formulir pengajuan.");
-} else {
-  bukaKamera();
+function hitungMundur() {
+  const btn = $("#resend");
+  let sisa = APP.cooldown;
+  clearInterval(state.timer);
+  btn.disabled = true;
+  const tick = () => {
+    if (sisa <= 0) { clearInterval(state.timer); btn.disabled = false; btn.textContent = "Kirim ulang kode"; return; }
+    btn.textContent = "Kirim ulang dalam " + sisa + " dtk"; sisa--;
+  };
+  tick(); state.timer = setInterval(tick, 1000);
 }
+$("#resend").addEventListener("click", async () => {
+  const btn = $("#resend");
+  btn.disabled = true; btn.textContent = "Mengirim kode";
+  const res = await kirimKode();
+  if (!res.success) { btn.disabled = false; btn.textContent = "Kirim ulang kode"; return say(notice, "err", res.message); }
+  state.otpId = res.otpId;
+  $("#kode").value = "";
+  say(notice, "ok", "Kode baru terkirim. Kode lama tidak berlaku lagi untuk sesi ini.");
+  hitungMundur();
+});
+$("#change-contact").addEventListener("click", () => { clearInterval(state.timer); show("v-contact", 1); $("#kontak").focus(); });
+$("#kode").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, APP.otpLength); });
+
+$("#f-code").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const kode = $("#kode").value;
+  if (kode.length !== APP.otpLength) return say(notice, "err", "Masukkan " + APP.otpLength + " digit kode.");
+  const btn = $("#f-code .btn-primary");
+  busy(btn, true, "Memeriksa kode");
+  const res = await call("verifyOTP", state.otpId, kode);
+  busy(btn, false);
+  if (!res.success) { $("#kode").select(); return say(notice, "err", res.message); }
+  clearInterval(state.timer);
+  if (res.menunggu) { show("v-contact", 1); return say(notice, "ok", res.message); }
+  state.token = res.token;
+  show("v-form", 2);
+  siapkanKontakLain();
+  if (state.namaDaftar) $("#nama").value = state.namaDaftar;
+  $("#nama").focus();
+});
+
+// --- Langkah 2: formulir ---
+/** Kolom kontak kedua untuk pemberitahuan: email bila diverifikasi lewat nomor HP, dan sebaliknya. */
+function siapkanKontakLain() {
+  const viaEmail = state.kanal === "email";
+  const tampil = viaEmail ? APP.notifWa : APP.notifEmail;
+  const inp = $("#kontak-lain");
+  $("#kontak-lain-field").hidden = !tampil;
+  if (!tampil) { inp.value = ""; return; }
+  $("#kontak-lain-label").textContent = viaEmail ? "Nomor WhatsApp untuk pemberitahuan (opsional)" : "Email untuk pemberitahuan (opsional)";
+  inp.type = viaEmail ? "tel" : "email";
+  inp.inputMode = viaEmail ? "tel" : "email";
+  inp.autocomplete = viaEmail ? "tel" : "email";
+  inp.placeholder = viaEmail ? "081234567890" : "nama@email.com";
+  $("#kontak-lain-hint").textContent = "Kabar status pengajuan dikirim ke kontak yang Anda verifikasi" +
+    (viaEmail ? " dan ke WhatsApp ini." : " dan ke email ini.");
+}
+$("#nominal-hint").textContent = rupiah(APP.minNominal) + " sampai " + rupiah(APP.maxNominal) + ".";
+$("#tenor").innerHTML = APP.tenor.map((t, i) =>
+  `<label><input type="radio" name="tenor" value="${t}"${i === 1 ? " checked" : ""}><span>${t} bulan</span></label>`).join("");
+$("#akad").innerHTML = APP.akad.map((a, i) =>
+  `<label class="choice"><input type="radio" name="akad" value="${esc(a.id)}"${i === 0 ? " checked" : ""}><div><strong>${esc(a.id)}</strong><small>${esc(a.ket)}</small></div></label>`).join("");
+
+$("#nik").addEventListener("input", (e) => { e.target.value = e.target.value.replace(/\D/g, "").slice(0, 16); });
+$("#nominal").addEventListener("input", (e) => {
+  const d = e.target.value.replace(/\D/g, "").slice(0, 12);
+  e.target.value = d ? Number(d).toLocaleString("id-ID") : "";
+});
+
+function matikanKamera() {
+  if (state.stream) state.stream.getTracks().forEach((t) => t.stop());
+  state.stream = null;
+  $("#cam").hidden = true;
+  $("#cam-btn").textContent = state.foto ? "Foto ulang" : "Buka kamera";
+}
+function pakaiFoto(sumber, w, h) {
+  if (kamera.id) { clearInterval(kamera.poll); kamera.poll = null; kamera.id = ""; }
+  // Perkecil ke sisi terpanjang 960px agar unggahan ringan
+  const k = Math.min(1, 960 / Math.max(w, h));
+  const c = document.createElement("canvas");
+  c.width = Math.round(w * k); c.height = Math.round(h * k);
+  c.getContext("2d").drawImage(sumber, 0, 0, c.width, c.height);
+  state.foto = c.toDataURL("image/jpeg", 0.82);
+  $("#shot").src = state.foto; $("#shot").hidden = false;
+  $("#frame svg").style.display = "none";
+  $("#frame").classList.add("has");
+  $("#selfie-hint").textContent = "Foto siap. Pastikan wajah terlihat jelas.";
+  matikanKamera();
+}
+/** Status izin kamera menurut browser: "granted", "denied", "prompt", atau "" bila tidak bisa dibaca. */
+async function izinKamera() {
+  try { return (await navigator.permissions.query({ name: "camera" })).state; } catch (e) { return ""; }
+}
+/** Menjelaskan kenapa kamera gagal dibuka, berdasarkan jawaban asli dari browser. */
+async function pesanKamera(err) {
+  const n = (err && err.name) || "", m = (err && err.message) || "";
+  const detail = n === "TidakDidukung" ? "" : " (Detail: " + n + (m ? ", " + m : "") + ")";
+  let pesan;
+  if (n === "TidakDidukung") pesan = "Browser ini tidak mendukung kamera. Buka halaman ini di Chrome atau Safari.";
+  else if (n === "NotFoundError" || n === "OverconstrainedError") pesan = "Kamera tidak ditemukan di perangkat ini. Pilih foto dari galeri.";
+  else if (n === "NotReadableError" || n === "AbortError") pesan = "Kamera tidak bisa dinyalakan. Biasanya sedang dipakai aplikasi lain (Camera, Teams, Zoom, Meet) atau penutup kamera laptop tertutup. Tutup aplikasi itu, lalu tekan Buka kamera lagi.";
+  else if (n === "NotAllowedError" || n === "SecurityError") {
+    const izin = await izinKamera();
+    if (/system/i.test(m)) pesan = "Kamera diblokir oleh sistem operasi, bukan oleh situs ini. Di Windows buka Settings > Privacy & security > Camera, lalu izinkan aplikasi desktop memakai kamera.";
+    else if (/dismiss/i.test(m)) pesan = "Jendela izin kamera ditutup sebelum dijawab. Tekan Buka kamera lagi, lalu pilih Allow.";
+    else if (izin === "denied") pesan = "Izin kamera untuk situs ini berstatus Block. Klik ikon di kiri alamat web, ubah Camera menjadi Allow, lalu muat ulang halaman.";
+    else pesan = "Browser menolak kamera tanpa bertanya, padahal izin situs tidak diblokir. Biasanya kamera dimatikan oleh kebijakan kantor atau oleh sistem operasi.";
+  } else pesan = "Kamera tidak bisa dibuka. Pilih foto dari galeri.";
+  return pesan + detail;
+}
+/**
+ * Meminta kamera depan. Kalau kamera bawaan gagal dinyalakan (mis. yang terpilih ternyata kamera
+ * inframerah atau kamera virtual), coba lagi lalu coba setiap kamera yang terpasang satu per satu.
+ */
+async function mintaKamera() {
+  const md = navigator.mediaDevices;
+  if (!md || !md.getUserMedia) throw { name: "TidakDidukung" };
+  const ditolak = (e) => e.name === "NotAllowedError" || e.name === "SecurityError";
+  let asal;
+  try { return await md.getUserMedia({ video: { facingMode: "user" }, audio: false }); } catch (e) { asal = e; }
+  if (ditolak(asal)) throw asal;
+  await new Promise((r) => setTimeout(r, 600));          // beri waktu kalau kamera baru saja dilepas aplikasi lain
+  try { return await md.getUserMedia({ video: true, audio: false }); } catch (e) { if (ditolak(e)) throw e; }
+  let daftar = [];
+  try { daftar = (await md.enumerateDevices()).filter((d) => d.kind === "videoinput" && d.deviceId); } catch (e) { /* abaikan */ }
+  for (const d of daftar) {
+    try { return await md.getUserMedia({ video: { deviceId: { exact: d.deviceId } }, audio: false }); } catch (e) { /* coba kamera berikutnya */ }
+  }
+  throw asal;
+}
+// --- Tab kamera di luar Apps Script ---
+// Bingkai Apps Script bisa ditolak browser saat meminta kamera. Jika alamat tab kamera diatur
+// (CONFIG.CAMERA_PAGE_URL), kamera dibuka di tab itu dan fotonya dikirim balik lewat server.
+const kamera = { luar: false, id: "", poll: null };
+function bingkaiMenolakKamera() {
+  try {
+    const fp = document.featurePolicy || document.permissionsPolicy;
+    return !!(fp && fp.allowsFeature && !fp.allowsFeature("camera"));
+  } catch (e) { return false; }
+}
+kamera.luar = !!APP.kameraUrl && bingkaiMenolakKamera();
+
+function berhentiMenunggu() {
+  clearInterval(kamera.poll); kamera.poll = null; kamera.id = "";
+  $("#cam-btn").textContent = state.foto ? "Foto ulang" : "Buka kamera";
+}
+/** Membuka tab kamera. Harus dipanggil langsung dari klik supaya tab tidak diblokir browser. */
+function bukaTabKamera() {
+  const id = crypto.randomUUID() + crypto.randomUUID();
+  const url = APP.kameraUrl + "#api=" + encodeURIComponent(APP.apiUrl) + "&id=" + id + "&brand=" + encodeURIComponent(APP.brand);
+  const tab = window.open(url, "_blank");
+  if (!tab) { say(notice, "err", "Browser memblokir tab kamera. Izinkan pop-up untuk situs ini, lalu tekan Buka kamera lagi."); return; }
+  kamera.id = id;
+  $("#cam-btn").textContent = "Batalkan";
+  say(notice, "ok", "Kamera dibuka di tab baru. Ambil foto di sana, lalu kembali ke tab ini.");
+  const daftar = call("daftarKamera", state.token, id);
+  let sisa = 150;                                   // 150 x 2 detik = 5 menit
+  clearInterval(kamera.poll);
+  kamera.poll = setInterval(async () => {
+    if (kamera.id !== id) return;
+    const d = await daftar;
+    if (!d.success) { berhentiMenunggu(); return say(notice, "err", d.message); }
+    if (--sisa <= 0) { berhentiMenunggu(); return say(notice, "err", "Foto tidak diterima dalam 5 menit. Tekan Buka kamera untuk mencoba lagi."); }
+    const res = await call("ambilFotoKamera", state.token, id);
+    if (kamera.id !== id) return;
+    if (!res.success) { berhentiMenunggu(); return say(notice, "err", res.message); }
+    if (!res.foto) return;
+    berhentiMenunggu();
+    const img = new Image();
+    img.onload = () => { pakaiFoto(img, img.naturalWidth, img.naturalHeight); say(notice); };
+    img.onerror = () => say(notice, "err", "Foto dari tab kamera tidak bisa dibaca. Coba lagi.");
+    img.src = res.foto;
+  }, 2000);
+}
+
+$("#cam-btn").addEventListener("click", async () => {
+  const cam = $("#cam"), btn = $("#cam-btn");
+  if (kamera.id) { berhentiMenunggu(); return say(notice); }          // tombol sedang berfungsi sebagai "Batalkan"
+  if (state.stream) { if (cam.videoWidth) pakaiFoto(cam, cam.videoWidth, cam.videoHeight); return; }
+  if (kamera.luar) return bukaTabKamera();
+  btn.disabled = true;
+  try {
+    // getUserMedia dipanggil langsung saat tombol ditekan: inilah satu-satunya cara halaman web
+    // meminta browser menampilkan jendela izin kamera.
+    state.stream = await mintaKamera();
+    cam.srcObject = state.stream;
+    cam.hidden = false; $("#shot").hidden = true; $("#frame svg").style.display = "none";
+    btn.textContent = "Ambil foto";
+    say(notice);
+  } catch (err) {
+    btn.disabled = false;
+    const ditolak = (err.name === "NotAllowedError" || err.name === "SecurityError") && !/dismiss/i.test(err.message || "");
+    if (ditolak && APP.kameraUrl) {
+      // Halaman ini tidak diberi kamera: mulai sekarang pakai tab kamera
+      kamera.luar = true;
+      return bukaTabKamera();
+    }
+    say(notice, "err", await pesanKamera(err));
+    // Di ponsel, tawarkan aplikasi kamera bawaan: tidak memerlukan izin kamera browser
+    if (window.matchMedia("(pointer: coarse)").matches) $("#native-cam").hidden = false;
+  } finally {
+    btn.disabled = false;
+  }
+});
+function bacaFile(e) {
+  const f = e.target.files[0];
+  if (!f) return;
+  const url = URL.createObjectURL(f), img = new Image();
+  img.onload = () => { pakaiFoto(img, img.naturalWidth, img.naturalHeight); URL.revokeObjectURL(url); say(notice); };
+  img.onerror = () => { say(notice, "err", "File ini bukan gambar yang bisa dibaca. Pilih foto JPG atau PNG."); URL.revokeObjectURL(url); };
+  img.src = url;
+  e.target.value = "";
+}
+$("#file").addEventListener("change", bacaFile);
+$("#file-cam").addEventListener("change", bacaFile);
+
+$("#f-loan").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const nominal = Number($("#nominal").value.replace(/\D/g, ""));
+  const form = {
+    nama: $("#nama").value.trim(),
+    nik: $("#nik").value,
+    nominal: nominal,
+    tenor: Number($('input[name="tenor"]:checked').value),
+    akad: $('input[name="akad"]:checked').value,
+    foto: state.foto,
+    setuju: $("#setuju").checked,
+    kontakLain: $("#kontak-lain-field").hidden ? "" : $("#kontak-lain").value.trim()
+  };
+  const salah =
+    form.nama.length < 3 ? ["Isi nama lengkap sesuai KTP.", "#nama"] :
+    form.nik.length !== 16 ? ["NIK harus 16 digit.", "#nik"] :
+    nominal < APP.minNominal || nominal > APP.maxNominal ? ["Nominal harus antara " + rupiah(APP.minNominal) + " dan " + rupiah(APP.maxNominal) + ".", "#nominal"] :
+    !form.foto ? ["Ambil atau pilih foto selfie dulu.", "#cam-btn"] :
+    !form.setuju ? ["Centang persetujuan pemrosesan data untuk melanjutkan.", "#setuju"] : null;
+  if (salah) { say(notice, "err", salah[0]); $(salah[1]).focus(); return; }
+
+  const btn = $("#f-loan .btn-primary");
+  busy(btn, true, "Mengirim pengajuan");
+  const res = await call("simpanPengajuan", state.token, form);
+  busy(btn, false);
+  if (res.success) {
+    state.foto = ""; state.token = "";
+    $("#done-id").textContent = res.idPengajuan;
+    $("#done-notif").textContent = res.notif || "";
+    $("#done-notif").hidden = !res.notif;
+    return show("v-done", 3);
+  }
+  if (res.sesiHabis) { show("v-contact", 1); }
+  say(notice, "err", res.message);
+});
+
+// ================= ADMIN =================
+const admin = { token: "", data: [], filter: "MENUNGGU_REVIEW", pilih: null };
+const LABEL = { MENUNGGU_REVIEW: ["Menunggu", "wait"], DISETUJUI: ["Disetujui", "ok"], DITOLAK: ["Ditolak", "no"] };
+const adminNotice = $("#admin-notice");
+
+document.querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => b.closest("dialog").close()));
+let admOtpId = "";
+function langkahLogin(otp) {
+  // otp = false: isi username + password; otp = true: isi kode yang dikirim ke kontak petugas
+  $("#adm-otp-row").hidden = !otp;
+  $("#adm-u").disabled = otp; $("#adm-p").disabled = otp;
+  $("#f-login .btn-primary").textContent = otp ? "Verifikasi kode" : "Masuk";
+  if (!otp) { admOtpId = ""; $("#adm-otp").value = ""; }
+}
+$("#open-login").addEventListener("click", () => { say($("#login-err")); langkahLogin(false); $("#dlg-login").showModal(); });
+
+$("#f-login").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const btn = $("#f-login .btn-primary"), err = $("#login-err");
+  say(err);
+  let res;
+  if (admOtpId) {
+    busy(btn, true, "Memeriksa kode");
+    res = await call("verifikasiOtpAdmin", admOtpId, $("#adm-otp").value);
+    busy(btn, false);
+    if (!res.success) { if (res.ulang) langkahLogin(false); return say(err, "err", res.message); }
+  } else {
+    busy(btn, true, "Memeriksa");
+    res = await call("loginAdmin", $("#adm-u").value, $("#adm-p").value);
+    busy(btn, false);
+    $("#adm-p").value = "";
+    if (!res.success) return say(err, "err", res.message);
+    if (res.perluOtp) {
+      admOtpId = res.otpId;
+      langkahLogin(true);
+      $("#adm-otp-hint").textContent = "Kode dikirim ke " + res.tujuan + ".";
+      $("#adm-otp").focus();
+      return;
+    }
+  }
+  langkahLogin(false);
+  admin.token = res.token;
+  $("#admin-name").textContent = res.nama;
+  $("#dlg-login").close();
+  matikanKamera();
+  $("#app-user").hidden = true; $("#app-admin").hidden = false;
+  muat();
+});
+
+function keluar(pesan) {
+  if (admin.token) call("logoutAdmin", admin.token);
+  admin.token = ""; admin.data = [];
+  if ($("#dlg-review").open) $("#dlg-review").close();
+  $("#app-admin").hidden = true; $("#app-user").hidden = false;
+  $("#rows").innerHTML = "";
+  if (pesan) say(notice, "err", pesan);
+}
+$("#logout").addEventListener("click", () => keluar());
+
+async function muat() {
+  $("#rows").innerHTML = '<tr><td colspan="6" class="empty">Memuat pengajuan</td></tr>';
+  const res = await call("getDaftarPengajuan", admin.token);
+  if (res.sesiHabis) return keluar(res.message);
+  if (!res.success) { $("#rows").innerHTML = ""; return say(adminNotice, "err", res.message); }
+  admin.data = res.data;
+  render();
+}
+$("#refresh").addEventListener("click", () => { say(adminNotice); muat(); });
+$("#search").addEventListener("input", render);
+
+function render() {
+  const hitung = (s) => admin.data.filter((d) => !s || d.status === s).length;
+  $("#tabs").innerHTML = [["MENUNGGU_REVIEW", "Menunggu"], ["DISETUJUI", "Disetujui"], ["DITOLAK", "Ditolak"], ["", "Semua"]]
+    .map(([k, t]) => `<button class="tab" type="button" data-f="${k}" aria-pressed="${admin.filter === k}">${t}<b>${hitung(k)}</b></button>`).join("");
+
+  const q = $("#search").value.trim().toLowerCase();
+  const list = admin.data.filter((d) => (!admin.filter || d.status === admin.filter) &&
+    (!q || (d.nama + " " + d.id + " " + d.kontak).toLowerCase().includes(q)));
+
+  if (!list.length) {
+    const kosong = q ? "Tidak ada pengajuan yang cocok dengan pencarian." :
+      admin.filter === "MENUNGGU_REVIEW" ? "Tidak ada pengajuan yang menunggu pemeriksaan." : "Belum ada pengajuan di sini.";
+    $("#rows").innerHTML = `<tr><td colspan="6" class="empty">${kosong}</td></tr>`;
+    return;
+  }
+  $("#rows").innerHTML = list.map((d) => {
+    const [label, cls] = LABEL[d.status] || [d.status, "wait"];
+    return `<tr>
+      <td><strong>${esc(d.nama)}</strong><small>${esc(d.kontak)}</small></td>
+      <td>${esc(d.id)}<small>${esc(tanggal(d.tanggal))}</small></td>
+      <td><span class="num">${esc(rupiah(d.nominal))}</span><small>${esc(d.tenor)} bulan</small></td>
+      <td>${esc(d.akad)}</td>
+      <td><span class="pill ${cls}">${esc(label)}</span></td>
+      <td style="text-align:right"><button class="btn btn-quiet btn-sm" type="button" data-id="${esc(d.id)}">Periksa</button></td>
+    </tr>`;
+  }).join("");
+}
+$("#tabs").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-f]");
+  if (b) { admin.filter = b.dataset.f; render(); }
+});
+$("#rows").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-id]");
+  if (b) periksa(b.dataset.id);
+});
+
+async function periksa(id) {
+  const d = admin.data.find((x) => x.id === id);
+  if (!d) return;
+  admin.pilih = id;
+  const [label] = LABEL[d.status] || [d.status];
+  $("#rev-title").textContent = d.nama;
+  $("#rev-sub").textContent = d.id + ", diajukan " + tanggal(d.tanggal) + ". Status: " + label + (d.pemeriksa ? " oleh " + d.pemeriksa : "") + ".";
+  $("#rev-facts").innerHTML = [["NIK", d.nik], ["Kontak", d.kontak], ["WhatsApp", d.wa], ["Email", d.email], ["Nominal", rupiah(d.nominal)], ["Tenor", d.tenor + " bulan"], ["Akad", d.akad]]
+    .filter(([k, v]) => k !== "WhatsApp" && k !== "Email" || (v && v !== d.kontak))
+    .map(([k, v]) => `<div><dt>${k}</dt><dd>${esc(v)}</dd></div>`).join("");
+  $("#rev-note").value = d.catatan;
+  say($("#rev-err"));
+  const photo = $("#rev-photo");
+  photo.textContent = "Memuat foto";
+  $("#dlg-review").showModal();
+
+  const res = await call("getFotoSelfie", admin.token, id);
+  if (admin.pilih !== id) return;               // admin sudah membuka pengajuan lain
+  if (res.sesiHabis) return keluar(res.message);
+  if (!res.success) { photo.textContent = res.message; return; }
+  const img = new Image();
+  img.alt = "Foto selfie " + d.nama;
+  img.src = res.foto;
+  photo.textContent = ""; photo.appendChild(img);
+}
+
+async function putuskan(status, btn) {
+  const note = $("#rev-note").value.trim(), err = $("#rev-err");
+  if (status === "DITOLAK" && !note) { say(err, "err", "Tulis alasan penolakan di catatan."); $("#rev-note").focus(); return; }
+  say(err);
+  const lain = btn.id === "rev-ok" ? $("#rev-no") : $("#rev-ok");
+  lain.disabled = true;
+  busy(btn, true, "Menyimpan");
+  const res = await call("updateStatusPengajuan", admin.token, admin.pilih, status, note);
+  busy(btn, false); lain.disabled = false;
+  if (res.sesiHabis) return keluar(res.message);
+  if (!res.success) return say(err, "err", res.message);
+  $("#dlg-review").close();
+  say(adminNotice, "ok", res.message);
+  muat();
+}
+$("#rev-ok").addEventListener("click", (e) => putuskan("DISETUJUI", e.currentTarget));
+$("#rev-no").addEventListener("click", (e) => putuskan("DITOLAK", e.currentTarget));
+$("#dlg-review").addEventListener("close", () => { admin.pilih = null; $("#rev-photo").textContent = ""; });
 </script>
 </body>
 </html>
